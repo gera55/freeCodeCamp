@@ -111,6 +111,13 @@ Algunos de los principios que influyeron en el diseño de Python se incluyen com
 1.  Lenguaje interactivo con soporte de módulo para casi todas las funcionalidades.
 2.  Código abierto: Entonces, puede contribuir a la comunidad, las funciones que ha desarrollado para su uso futuro y para ayudar a otros
 3.  Un montón de buenos intérpretes y cuadernos disponibles para una mejor experiencia como el cuaderno jupyter.
+4.  Simplificado y rápido: Lo bueno de python es que simplifica mucho la programación “hace que te ciñas a un modo de lenguaje de programación, python te propone un patrón”. Señala que es un gran lenguaje para scripting, “si quieres algo rápido (en el sentido del performance del lenguaje), con unas cuantas líneas ya está”.
+5.  Elegante y flexible: El lenguaje te da muchas herramientas “si quiero listas de varios datos, no hace falta que declares cada cosa” y agrega que al ser tan flexible no te preocupas tanto por los detalles.
+6.  Programación sana y productiva: Programar en python se convierte en un estilo muy sano de programar: “es sencillo de aprender, direccionado a las reglas perfectas, te haces como dependiente de mejorar, cumplir las reglas, el uso de las lineas, de variables”.  Afirma que es un lenguaje que fue hecho con productividad en mente “python me hace ser mas productivo, me permite entregar en los tiempos que me piden”.
+7.  Ordenado y limpio: Este es un punto en el cual los tres coinciden. El orden que mantiene python es de lo que más le gusta “es muy leible, cualquier otro programador lo puede leer y trabajar sobre el”. Destaca que los módulos están bien organizados, a diferencia de otros lenguajes.
+8.  Portable: Concuerdan en que es un lenguaje muy portable (ya sea en mac, linux o windows) en comparación con otros lenguajes.
+Baterías incluidas: “Las librerías que más necesitas ya están dentro del código”. Comentó en detalle cuáles son estas baterías incluidas al contarnos “cómo se utiliza python en mejorando.la“
+9.  Comunidad: Algo muy importante para el desarrollo de un lenguaje es la comunidad, “la misma comunidad de python cuida el lenguaje y casi todas las actualizaciones se hacen de manera democrática.”
 
 #### Contras
 
