@@ -1,0 +1,436 @@
+ Roles y permisos en Laravel con spatie/laravel-permission
+ 0 comentarios
+
+Roles y permisos en Laravel
+En el canal tenemos una serie de videos sobre el paquete Shinobi y lo puedes estudiar desde este enlace: Curso de Roles y Permisos.
+
+Shinobi es un paquete que al igual que spatie/laravel-permission se dedica a la implementación de Roles y Permisos en Laravel, te dejé el enlace porque en video es muy práctico y amigable estudiarlo, y quizás te ayude a comprender mejor este tutorial.
+
+Vamos a tratar aquí a spatie/laravel-permission, que podría decirse es el componente rival de Shinobi.
+
+Objetivo: laravel-permission es un paquete que permite asociar usuarios a roles y permisos.
+
+Previa explicación: Muchos me han escrito diciendo "podrías hacer un video sobre spatie" y ahí hay algo incorrecto... Spatie es una empresa de Bélgica que desarrolla y diseña sitios web, ellos crean sus propias soluciones y las suben a GitHub para que otros programadores y empresas aprovechen su código y componentes, laravel-permission es uno de esos componentes y es el nombre del paquete. Entonces ya sabes, Spatie es el nombre de la empresa y laravel-permission es el nombre del componente o paquete.
+
+La función de roles y permisos en un sistema nos proporciona poder y podríamos decidir otorgar o quitar acceso a un módulo a cualquier usuario.
+
+Definición
+Lista de control de acceso o ACL (access control list))
+
+Es un término famoso en informática, se refiere a la seguridad y permite dar o quitar permisos a un usuario sobre nuestro sistema. Tu puedes crear un completo sistema de roles y permisos o hacerlo de otra manera, en cualquier caso estarás implementado ACL en tu sistema. En este tutorial tendrás los conceptos básicos de seguridad informática.
+
+Tu puedes trabajar con ACL si implementas un Middleware, creas políticas de acceso, etc. Aquí verás roles y permisos
+
+Antes de comenzar algunas funciones
+Este paquete tiene métodos interesantes para administrar los roles y permisos, veamos algunos y luego sigamos con el tutorial.
+
+Listado de métodos
+
+Con givePermissionTo conseguimos dar permisos, ejemplo: $user->givePermissionTo('posts.index');
+Con assignRole asignamos un rol al usuario, ejemplo: $user->assignRole('admin');
+givePermissionTo también relacionaría permisos con un rol, ejemplo: $role->givePermissionTo('posts.index');
+Si deseamos ver todos los permisos asignados a un usuario podemos usar $user->permissions;
+Si necesitamos saber el listado de permisos asignados a un usuario a través de un rol podemos usar $permissions = $user->getAllPermissions();
+// get all permissions inherited by the user via roles $permissions = $user->getAllPermissions();
+
+El gran BOOM de este componente es que cubre multiples guards y cada guard puede tener su propio conjunto de roles y permisos. ¿Esto que quiere decir?, que podemos tener permisos para el acceso web y diferentes para el acceso a un API.
+
+Web es el acceso clásico y tradicional a un sistema
+Un guard de API basa su seguridad en tokens
+Esto significa que si vamos a crear un API en Laravel y queremos que esté incluido en nuestro gran sistema de roles y permisos con spatie/laravel-permission lo podemos lograr.
+
+Por último, podemos ver que la forma de comprobar si el usuario logueado tiene o no permisos sobre una ruta es a través del método can, ejemplo: $user->can('posts.index');
+
+Tutorial de spatie/laravel-permission
+Paso 1 (configuración)
+Comenzamos nuestro proyecto instalando Laravel, ejecutamos el comando composer create-project --prefer-dist laravel/laravel tutorial-spatie y al terminar nos dirigimos hacía ese nuevo proyecto cd tutorial-spatie/
+
+Archivo .env
+
+Tu debes colocar tus datos de acceso a tu base de datos
+
+DB_DATABASE=spatie 
+DB_USERNAME=root 
+DB_PASSWORD=secret
+Ahora vamos a configurar el service provider desde config/app.php (llave de providers)
+
+<?php
+
+return [
+
+    'providers' => [
+        // ...
+        Spatie\Permission\PermissionServiceProvider::class,
+    ],
+
+];
+Configuración de middleware
+
+<?php
+
+namespace App\Http;
+
+use Illuminate\Foundation\Http\Kernel as HttpKernel;
+
+class Kernel extends HttpKernel
+{
+
+    protected $routeMiddleware = [
+        // ...
+        'role' => \Spatie\Permission\Middlewares\RoleMiddleware::class,
+        'permission' => \Spatie\Permission\Middlewares\PermissionMiddleware::class,
+    ];
+
+}
+Paso 2
+Una vez allí (en la carpeta del proyecto) procedemos a instalar el componente, usamos el comando de instalación composer require spatie/laravel-permission y luego de su instalación ejecutamos los comandos correspondientes para terminar la configuración.
+
+php artisan vendor:publish --provider="Spatie\Permission\PermissionServiceProvider" --tag="migrations"
+php artisan migrate
+php artisan vendor:publish --provider="Spatie\Permission\PermissionServiceProvider" --tag="config"
+Es muy sencillo, básicamente publicar las migraciones, luego migrar (crear las tablas) y por último publicar el archivo de configuraciones en config/permission.php.
+
+Lista de archivos de migración
+
+2014_10_12_000000_create_users_table.php
+2014_10_12_100000_create_password_resets_table.php
+2018_04_05_155250_create_permission_tables.php
+2018_04_05_161544_create_products_table.php
+En tu caso, la fecha va a ser diferente.
+
+Paso 3 (archivos seeders)
+Para este ejemplo vamos a crear una tabla llamada productos (products), sobre este tema vamos a simular el otorgar o denegar permisos.
+
+Instalamos el sistema de autenticación php artisan make:auth
+Creamos el modelo, controlador, migración y seed de productos php artisan make:model Product -a
+Seed de usuarios php artisan make:seeder UsersTableSeeder
+Seed de productos php artisan make:seeder ProductsTableSeeder
+Seed de permisos php artisan make:seeder PermissionsTableSeeder
+Paso 4 (configuración de seeders y factory)
+DatabaseSeeder
+
+public function run()
+{
+    $this->call(UsersTableSeeder::class);
+    $this->call(ProductsTableSeeder::class);
+    $this->call(PermissionsTableSeeder::class);
+}
+UsersTableSeeder
+
+<?php
+
+use Illuminate\Database\Seeder;
+
+class UsersTableSeeder extends Seeder
+{
+    /**
+
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run()
+    {
+        App\User::create([
+            'name'      => 'Italo Morales',
+            'email'     => 'i@italomoralesf.com',
+            'password'     => bcrypt('123'),
+
+        ]);
+
+        factory(App\User::class, 7)->create();
+    }
+}
+ProductsTableSeeder
+
+<?php
+
+use Illuminate\Database\Seeder;
+
+class ProductsTableSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run()
+    {
+        factory(App\Product::class, 20)->create();
+    }
+}
+PermissionsTableSeeder
+
+<?php
+
+use Illuminate\Database\Seeder;
+
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
+use App\User;
+
+class PermissionsTableSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run()
+    {
+
+        //Permission list
+        Permission::create(['name' => 'products.index']);
+        Permission::create(['name' => 'products.edit']);
+        Permission::create(['name' => 'products.show']);
+        Permission::create(['name' => 'products.create']);
+        Permission::create(['name' => 'products.destroy']);
+
+        //Admin
+        $admin = Role::create(['name' => 'Admin']);
+
+        $admin->givePermissionTo([
+            'products.index',
+            'products.edit',
+            'products.show',
+            'products.create',
+            'products.destroy'
+        ]);
+        //$admin->givePermissionTo('products.index');
+        //$admin->givePermissionTo(Permission::all());
+       
+        //Guest
+        $guest = Role::create(['name' => 'Guest']);
+
+        $guest->givePermissionTo([
+            'products.index',
+            'products.show'
+        ]);
+
+        //User Admin
+        $user = User::find(1); //Italo Morales
+        $user->assignRole('Admin');
+    }
+}
+UserFactory
+
+<?php
+
+use Faker\Generator as Faker;
+
+/*
+|--------------------------------------------------------------------------
+| Model Factories
+|--------------------------------------------------------------------------
+|
+| This directory should contain each of the model factory definitions for
+| your application. Factories provide a convenient way to generate new
+| model instances for testing / seeding your application's database.
+|
+*/
+
+$factory->define(App\User::class, function (Faker $faker) {
+    return [
+        'name' => $faker->name,
+        'email' => $faker->unique()->safeEmail,
+        'password' => '$2y$10$TKh8H1.PfQx37YgCzwiKb.KjNyWgaHb9cbcoQgdIVFlYg7B77UdFm', // secret
+        'remember_token' => str_random(10),
+    ];
+});
+ProductFactory
+
+<?php
+
+use Faker\Generator as Faker;
+
+$factory->define(App\Product::class, function (Faker $faker) {
+    return [
+        'name'             => $faker->sentence,
+        'description'     => $faker->text(500),
+    ];
+});
+Refrescamos nuestra base de datos con el comando php artisan migrate:refresh --seed, este paso llenará de datos tus tablas.
+
+Paso 5 (Entidades,modelos)
+Entidad User: es necesario hacer saber al sistema que necesita en usuarios la clase Spatie\Permission\Traits\HasRoles; con esto logramos que al iniciar sesión se aplique todo lo necesario respecto a roles y permisos al usuario logueado.
+
+<?php
+
+namespace App;
+
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+
+use Spatie\Permission\Traits\HasRoles;
+
+class User extends Authenticatable
+{
+    use Notifiable;
+    use HasRoles;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'name', 'email', 'password',
+    ];
+
+    /**
+     * The attributes that should be hidden for arrays.
+     *
+     * @var array
+     */
+    protected $hidden = [
+        'password', 'remember_token',
+    ];
+}
+Entidad Product
+
+<?php
+
+namespace App;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Product extends Model
+{
+    //
+}
+Paso 7 (Rutas)
+Archivo web de rutas
+
+<?php
+
+Route::get('/', function () {
+    return view('welcome');
+});
+
+Auth::routes();
+
+Route::get('/home', 'HomeController@index')->name('home');
+
+Route::middleware(['auth'])->group(function () {
+   
+    Route::post('products/store', 'ProductController@store')->name('products.store')
+                                                        ->middleware('permission:products.create');
+    Route::get('products', 'ProductController@index')->name('products.index')
+                                                        ->middleware('permission:products.index');
+    Route::get('products/create', 'ProductController@create')->name('products.create')
+                                                        ->middleware('permission:products.create');
+    Route::put('products/{role}', 'ProductController@update')->name('products.update')
+                                                        ->middleware('permission:products.edit');
+    Route::get('products/{role}', 'ProductController@show')->name('products.show')
+                                                        ->middleware('permission:products.show');
+    Route::delete('products/{role}', 'ProductController@destroy')->name('products.destroy')
+                                                        ->middleware('permission:products.destroy');
+    Route::get('products/{role}/edit', 'ProductController@edit')->name('products.edit')
+                                                        ->middleware('permission:products.edit');
+});
+Paso 8 (Proyecto en sí, el ejemplo con productos)
+ProductController
+
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Product;
+use Illuminate\Http\Request;
+
+class ProductController extends Controller
+{
+    public function index()
+    {
+        $products = Product::get();
+
+        return view('products.index', compact('products'));
+    }
+
+    public function create()
+    {
+        return 'Tiene permiso de crear';
+    }
+
+    public function show(Product $product)
+    {
+        return 'Tiene permiso de ver';
+    }
+
+    public function edit(Product $product)
+    {
+        return 'Tiene permiso de editar';
+    }
+
+    public function destroy(Product $product)
+    {
+        return 'Tiene permiso de eliminar';
+    }
+}
+product.blade.php
+
+@extends('layouts.app')
+
+@section('content')
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 col-md-offset-2">
+            <div class="panel panel-default">
+                <div class="panel-heading">Productos</div>
+
+                <div class="panel-body">     
+              
+                    @can('products.edit')
+                        <p class="text-right">
+                            <a href="{{ route('products.create') }}" class="btn btn-primary">
+                                Crear
+                            </a>
+                        </p>
+                    @endcan
+
+                    <table class="table table-striped">
+                        @foreach($products as $product)
+                        <tbody>
+                            <tr>
+                                <td>{{ $product->id }}</td>
+                                <td>{{ $product->name }}</td>
+                                <td>{{ $product->description }}</td>
+
+                                @can('products.edit')
+                                <td>
+                                    <a href="{{ route('products.edit', $product->id) }}" class="btn btn-sm btn-default">
+                                        Editar
+                                    </a>
+                                </td>
+                                @endcan
+
+                                @can('products.show')
+                                <td>
+                                    <a href="{{ route('products.show', $product->id) }}" class="btn btn-sm btn-default">
+                                        Ver
+                                    </a>
+                                </td>
+                                @endcan
+
+                                @can('products.destroy')
+                                <td>
+                                    <form action="{{ route('products.destroy', $product->id) }}" method="POST">
+                                        {{ method_field('DELETE') }}
+                                        {{ csrf_field() }}
+                                        <button type="submit" class="btn btn-sm btn-danger">
+                                            Eliminar
+                                        </button>
+                                    </form>
+                                </td>
+                                @endcan
+
+                            </tr>
+                        </tbody>
+                        @endforeach
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection
