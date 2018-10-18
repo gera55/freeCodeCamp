@@ -154,3 +154,5 @@ Si estos temas carecen de claridad sobre lo que debe hacerse, siéntete libre de
 **Encontré un error tipográfico, ¿debo informar un problema antes de poder hacer un pull request?**
 
 Para los errores tipográficos y otros cambios de redacción, puedes abrir directamente los pull request sin crear primero Issues. Los Issues son más bien para discutir problemas más grandes asociados con el código, o aspectos más estructurales del currículo.
+
+quiero contribuir a free code camp!
