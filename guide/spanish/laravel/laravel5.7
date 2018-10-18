@@ -1,0 +1,58 @@
+Laravel 5.7
+La última versión disponible del framework es esta 5.7 que viene con unas cuantas novedades.
+
+ 
+
+–    Verificación de correo electrónico
+En esta ocasión, el sistema de autenticación incluido por defecto en Laravel, tiene ahora la posibilidad de implementar la verificación de los usuarios por correo electrónico. Para ello se ha agregado un nuevo campo en la tabla users llamado email_verified_at.
+
+Para su implementación debemos incluir en el modelo User la interfaz MustVerifyEmail.
+
+<?php
+namespace App;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+class User extends Authenticatable implements MustVerifyEmail
+{
+    // ...
+}
+ 
+
+También debemos añadir verify en el archivo de rutas para comprobar la variable.
+
+Auth::routes(['verify' => true]);
+ 
+
+Para mandar estos correos de verificación será necesario que tengamos configurado un servicio de correo en la aplicación. Adicionalmente también disponemos de un middleware para controlar de manera sencilla el acceso a la aplicación para usuarios no verificados.
+
+'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+ 
+
+–    Política de acceso para usuarios no autenticados.
+Hasta esta versión, los usuarios no autenticados no podían acceder a las secciones protegidas con alguna política de acceso, sin la posibilidad de mostrarla, aunque no estuviera autenticado. Pero ahora si se podrá controlar que contenido quieres que se muestre a usuarios no autenticados en la aplicación declarando un “type-hint” opcional o utilizando un valor nulo por defecto en la definición del argumento del usuario:
+
+Gate::define('update-post', function (?User $user, Post $post) {
+    // ...
+});
+ 
+
+–    Cantidad de enlaces en la paginación
+Ya tenemos disponible la opción de configurar la cantidad de enlaces adicionales que queremos que se muestren a cada lado del paginador. Por defecto son tres enlaces, pero se puede sobreescribir dicho valor con nuevo método onEachSide:
+
+{{ $paginator->onEachSide(5)->links() }}
+ 
+
+–    Generador de URL con nueva sintaxis
+Nuevo método para la generación de URLs.
+
+action([UserController::class, 'index']);
+ 
+
+–    Symfony Dump Server
+Laravel 5.7 nos ofrece la posibilidad de activar un servidor dedicado a capturar las llamadas del método dump y mostrárnosla por consola. Para hacer uso de este paquete, debemos instalarlo vía composer desde el repositorio  https://github.com/beyondcode/laravel-dump-server . Tras su instalación podremos hacer uso este con el comando:
+
+php artisan dump-server
+ 
+
+Esto ejecutara un server dedicado a recoger y mostrar todas las llamadas del método dump(); y las mostrará por consola.
